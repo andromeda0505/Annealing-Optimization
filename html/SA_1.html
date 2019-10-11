@@ -1,0 +1,249 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>SA_1</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2019-10-11"><meta name="DC.source" content="SA_1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% Simulated Annealing, written by Mojtaba Eslami</span>
+
+
+clear <span class="string">all</span>
+
+ul = 0; <span class="comment">% lower bound of design variables</span>
+uh = 4; <span class="comment">% higher bound of design variables</span>
+
+x = [ul:0.01:uh];
+y = [ul:0.01:uh];
+<span class="keyword">for</span> i=1:length(x)
+    <span class="keyword">for</span> j=1:length(y)
+        f(i,j) = -sin(y(j))*sin(y(j)^2/pi)^20-sin(x(i))*sin(2*x(i)^2/pi)^20;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+figure(1);clf;hold <span class="string">on</span>
+contour(x,y,f,20)
+xlabel(<span class="string">'x_1'</span>)
+ylabel(<span class="string">'x_2'</span>)
+
+axis([ul uh ul uh])
+colormap(gray)
+
+c = .5; <span class="comment">% temperature reduction factor</span>
+n = 50; <span class="comment">% number of iterations before temperature reduction (n is used instead of the parameter m)</span>
+
+<span class="comment">% estimating the value of T</span>
+x1 = ul+rand(10,1)*uh; <span class="comment">% ten random numbers are generated for x1</span>
+x2 = ul+rand(10,1)*uh; <span class="comment">% ten random numbers are generated for x2</span>
+
+f = -sin(x1).*sin(x1.^2/pi).^20-sin(x2).*sin(2*x2.^2/pi).^20;
+T = abs(mean(f));
+
+p = 1; <span class="comment">%cycle number</span>
+i = 1; <span class="comment">%iteration number</span>
+vicinity_radius = 2;
+
+
+X = ul+(uh-ul)*rand(2,1);
+X_best = X;
+fbest(1) = 1000;
+
+<span class="keyword">while</span> p&lt;200
+    f = -sin(X(1)).*sin(X(1).^2/pi).^20-sin(X(2)).*sin(2*X(2).^2/pi).^20;
+
+    X_new(1) = max(X(1)-vicinity_radius,ul)+rand*(min(X(1)+vicinity_radius,uh)-max(X(1)-vicinity_radius,ul));
+    X_new(2) = max(X(2)-vicinity_radius,ul)+rand*(min(X(2)+vicinity_radius,uh)-max(X(2)-vicinity_radius,ul));
+
+    f_new = -sin(X_new(1)).*sin(X_new(1).^2/pi).^20-sin(X_new(2)).*sin(2*X_new(2).^2/pi).^20;
+
+    <span class="comment">% accept or reject X_new using Metropolis criterion</span>
+    <span class="keyword">if</span> f_new&lt;f
+        X = X_new;
+
+        <span class="comment">%saving the results</span>
+        <span class="keyword">if</span> f_new&lt;min(fbest)
+            X_best = X;
+            fbest(p) = min(min(fbest),f_new);
+        <span class="keyword">end</span>
+
+    <span class="keyword">elseif</span> exp(-(f_new-f)/T)&lt;rand
+        X = X_new;
+    <span class="keyword">end</span>
+
+
+    i = i+1;
+
+    <span class="keyword">if</span> i&gt;=n
+        fbest(p) = min(fbest);
+        p = p+1;
+        i = 1;
+        T = c*T;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+X_best
+
+figure(1)
+plot(X_best(1),X_best(2),<span class="string">'k.'</span>)
+
+figure(2)
+plot(fbest,<span class="string">'k.'</span>)
+xlabel(<span class="string">'cycle number'</span>)
+ylabel(<span class="string">'min f(x_1,x_2)'</span>)
+</pre><pre class="codeoutput">
+X_best =
+
+    2.2143    1.5632
+
+</pre><img vspace="5" hspace="5" src="SA_1_01.png" alt=""> <img vspace="5" hspace="5" src="SA_1_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Simulated Annealing, written by Mojtaba Eslami
+
+
+clear all
+
+ul = 0; % lower bound of design variables
+uh = 4; % higher bound of design variables
+
+x = [ul:0.01:uh];
+y = [ul:0.01:uh];
+for i=1:length(x)
+    for j=1:length(y)
+        f(i,j) = -sin(y(j))*sin(y(j)^2/pi)^20-sin(x(i))*sin(2*x(i)^2/pi)^20;
+    end
+end
+
+figure(1);clf;hold on
+contour(x,y,f,20)
+xlabel('x_1')
+ylabel('x_2')
+
+axis([ul uh ul uh])
+colormap(gray)
+
+c = .5; % temperature reduction factor
+n = 50; % number of iterations before temperature reduction (n is used instead of the parameter m)
+
+% estimating the value of T
+x1 = ul+rand(10,1)*uh; % ten random numbers are generated for x1
+x2 = ul+rand(10,1)*uh; % ten random numbers are generated for x2
+
+f = -sin(x1).*sin(x1.^2/pi).^20-sin(x2).*sin(2*x2.^2/pi).^20;
+T = abs(mean(f));
+
+p = 1; %cycle number
+i = 1; %iteration number
+vicinity_radius = 2;
+
+
+X = ul+(uh-ul)*rand(2,1);
+X_best = X;
+fbest(1) = 1000;
+
+while p<200
+    f = -sin(X(1)).*sin(X(1).^2/pi).^20-sin(X(2)).*sin(2*X(2).^2/pi).^20;
+    
+    X_new(1) = max(X(1)-vicinity_radius,ul)+rand*(min(X(1)+vicinity_radius,uh)-max(X(1)-vicinity_radius,ul));
+    X_new(2) = max(X(2)-vicinity_radius,ul)+rand*(min(X(2)+vicinity_radius,uh)-max(X(2)-vicinity_radius,ul));
+       
+    f_new = -sin(X_new(1)).*sin(X_new(1).^2/pi).^20-sin(X_new(2)).*sin(2*X_new(2).^2/pi).^20;
+    
+    % accept or reject X_new using Metropolis criterion
+    if f_new<f
+        X = X_new;
+        
+        %saving the results
+        if f_new<min(fbest)
+            X_best = X;
+            fbest(p) = min(min(fbest),f_new);
+        end
+        
+    elseif exp(-(f_new-f)/T)<rand
+        X = X_new;
+    end
+    
+        
+    i = i+1;
+    
+    if i>=n
+        fbest(p) = min(fbest);
+        p = p+1;
+        i = 1;
+        T = c*T;
+    end
+end
+
+X_best
+
+figure(1)
+plot(X_best(1),X_best(2),'k.')
+
+figure(2)
+plot(fbest,'k.')
+xlabel('cycle number')
+ylabel('min f(x_1,x_2)')
+
+
+##### SOURCE END #####
+--></body></html>
